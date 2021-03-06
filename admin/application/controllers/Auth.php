@@ -3,6 +3,61 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Auth extends CI_Controller {
 
+	public function auth_user()
+	{
+		header("Access-Control-Allow-Origin: *");
+		header("Access-Control-Allow-Headers: *");
+		
+		$post = $this->input->post();
+
+		if (!$post) {
+			header('Content-Type: application/json');
+
+			$response = [
+				'error' => false,
+				'message' => 'ERROR'
+			];
+			echo json_encode($response);
+			die;	
+		}
+
+		$this->db->where('email', $post['email']);
+		$user = $this->db->get('user')->row_array();
+
+		if ($user) {
+			if (password_verify($post['password'], $user['password'])) {
+
+				header('Content-Type: application/json');
+
+				$response = [
+					'error' => false,
+					'message' => 'Email dan password cocok'
+				];
+
+				echo json_encode($response);
+				
+			}else{
+				header('Content-Type: application/json');
+
+				$response = [
+					'error' => true,
+					'message' => 'Password salah'
+				];
+
+				echo json_encode($response);
+			}
+		}else{
+			header('Content-Type: application/json');
+
+			$response = [
+				'error' => true,
+				'message' => 'Email tidak ditemukan'
+			];
+
+			echo json_encode($response);
+		}
+	}
+
 	public function index()
 	{
 		if ($this->session->userdata('id_user') != '') {
